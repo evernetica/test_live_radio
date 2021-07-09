@@ -10,18 +10,18 @@ class DataRepositoryImpl extends DataRepository {
 
   DataRepositoryImpl() {
     //TODO: remove and add api
-    var item = MusicObject(
+    var _item = MusicObject(
         "id1423123",
         "http://ais-edge16-jbmedia-nyc04.cdnstream.com/hitlist",
         "https://via.placeholder.com/500/0000FF/FFFFFF/?text=Super%20Hits",
         "Super Hits ");
-    var item2 = MusicObject(
+    var _item2 = MusicObject(
         "id234134",
         "http://us3.internet-radio.com:8317/live",
         "https://via.placeholder.com/500/FF00FF/FFFFFF/?text=Retro%20Records",
         "Retro Records");
-    _musicList.add(item);
-    _musicList.add(item2);
+    _musicList.add(_item);
+    _musicList.add(_item2);
   }
 
   @override

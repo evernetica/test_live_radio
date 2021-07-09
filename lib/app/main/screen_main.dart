@@ -52,7 +52,12 @@ class _MainWidget extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Image.network(imageHolder),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Image.network(imageHolder),
+            ),
+          ),
           Text(name),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -60,8 +65,14 @@ class _MainWidget extends StatelessWidget {
               IconButton(
                   onPressed: _onPrevButton,
                   icon: Icon(Icons.skip_previous_sharp)),
-              IconButton(
-                  onPressed: () {}, icon: Icon(Icons.play_circle_outline)),
+              StreamBuilder<bool>(
+                stream: _playerCubit.isPlayingStream,
+                builder: (context, snapshot) {
+                  final bool isPlaying = snapshot.data ?? false;
+                  return IconButton(
+                      onPressed: _onPlayButton, icon: Icon(isPlaying ? Icons.stop_circle_outlined : Icons.play_circle_outline));
+                }
+              ),
               IconButton(
                   onPressed: _onNextButton, icon: Icon(Icons.skip_next_sharp))
             ],
@@ -79,5 +90,7 @@ class _MainWidget extends StatelessWidget {
     _playerCubit.onPrev();
   }
 
-  void _onPlayButton() {}
+  void _onPlayButton() {
+    _playerCubit.onChangePlayStop();
+  }
 }
