@@ -52,23 +52,39 @@ class _MainWidget extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Expanded(
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.network(
-                    imageHolder,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.black26,
-                          color: Colors.green,
-                        ),
-                      );
-                    },
+          GestureDetector(
+            onHorizontalDragEnd: (dragEndDetails){
+              if(dragEndDetails.primaryVelocity == null) return;
+              if (dragEndDetails.primaryVelocity!.isNegative) {
+                _onNextAction();
+              } else  {
+                _onPrevAction();
+              }
+            },
+            child: AnimatedSwitcher(
+              switchInCurve: Curves.easeInCirc,
+              switchOutCurve: Curves.easeOutCirc,
+              duration: Duration(milliseconds: 500),
+              child: Center(
+                key: Key( musicUrl),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.network(
+                        imageHolder,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.black26,
+                              color: Colors.green,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -91,7 +107,7 @@ class _MainWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _iconButton(Icon(Icons.skip_previous_sharp), _onPrevButton),
+                _iconButton(Icon(Icons.skip_previous_sharp), _onPrevAction),
                 StreamBuilder<bool>(
                     stream: _playerCubit.isPlayingStream,
                     builder: (context, snapshot) {
@@ -102,7 +118,7 @@ class _MainWidget extends StatelessWidget {
                               : Icons.play_circle_outline),
                           _onPlayButton);
                     }),
-                _iconButton(Icon(Icons.skip_next_sharp), _onNextButton)
+                _iconButton(Icon(Icons.skip_next_sharp), _onNextAction)
               ],
             ),
           )
@@ -111,11 +127,11 @@ class _MainWidget extends StatelessWidget {
     );
   }
 
-  void _onNextButton() {
+  void _onNextAction() {
     _playerCubit.onNext();
   }
 
-  void _onPrevButton() {
+  void _onPrevAction() {
     _playerCubit.onPrev();
   }
 
