@@ -46,10 +46,10 @@ class DataRepositoryImpl extends DataRepository {
     _musicList.clear();
     _musicList.addAll(await _getAll());
     if (_currentSingleMusicEntry == null)
-      _currentSingleMusicEntry = _musicList.firstEntry();
+      _currentSingleMusicEntry = _musicList.lastEntry();
     else {
       _currentSingleMusicEntry = _currentSingleMusicEntry?.previousEntry();
-      if(_currentSingleMusicEntry?.element == null) _currentSingleMusicEntry = _musicList.firstEntry();
+      if(_currentSingleMusicEntry?.element == null) _currentSingleMusicEntry = _musicList.lastEntry();
     }
 
     return Future.value(musicObjectToMusicEntity(_currentSingleMusicEntry!.element));
