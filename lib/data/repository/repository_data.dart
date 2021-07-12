@@ -1,32 +1,36 @@
 import 'package:flutter/foundation.dart';
+import 'package:gsheets/gsheets.dart';
 import 'package:test_live_radio/data/Mapper.dart';
 import 'package:test_live_radio/data/objects/object_music.dart';
 import 'package:test_live_radio/domain/entity/entity_music.dart';
 import 'package:test_live_radio/domain/repository/repository_data.dart';
 
+import '../gsheet_cred.dart';
+
 class DataRepositoryImpl extends DataRepository {
   List<MusicObject> _musicList = List.empty(growable: true);
   MusicObject? currentSingleMusic;
 
-  DataRepositoryImpl() {
-    //TODO: remove and add api
-    var _item = MusicObject(
-        "id1423123",
-        "http://ais-edge16-jbmedia-nyc04.cdnstream.com/hitlist",
-        "https://via.placeholder.com/500/0000FF/FFFFFF/?text=Super%20Hits",
-        "Super Hits ");
-    var _item2 = MusicObject(
-        "id234134",
-        "http://us3.internet-radio.com:8317/live",
-        "https://via.placeholder.com/500/FF00FF/FFFFFF/?text=Retro%20Records",
-        "Retro Records");
-    _musicList.add(_item);
-    _musicList.add(_item2);
+  Worksheet? _sheet;
+
+  Future<void> _init() async {
+    _sheet = (await GSheets(credentials).spreadsheet(spreadsheetId))
+        .worksheetByTitle('radio');
+  }
+
+  Future<List<MusicObject>> getAll() async {
+    if (_sheet == null) await _init();
+    if (_sheet == null) throw Exception("Google sheet is null");
+    final musics = await _sheet!.values.map.allRows();
+    if (musics!.isEmpty) throw Exception("There is no data in google sheet");
+    return musics.map((json) => MusicObject.fromGsheets(json)).toList();
   }
 
   @override
   Future<MusicEntity> getNextSingleMusic() async {
-    //TODO: !!
+    //TODO: !!order is wrong
+    _musicList.clear();
+    _musicList.addAll(await getAll());
     if (currentSingleMusic == null)
       currentSingleMusic = _musicList.first;
     else
@@ -37,7 +41,9 @@ class DataRepositoryImpl extends DataRepository {
 
   @override
   Future<MusicEntity> getPrevSingleMusic() async {
-    //TODO: !!
+    //TODO: !!order is wrong
+    _musicList.clear();
+    _musicList.addAll(await getAll());
     if (currentSingleMusic == null)
       currentSingleMusic = _musicList.first;
     else

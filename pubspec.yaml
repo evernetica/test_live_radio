@@ -32,6 +32,7 @@ dependencies:
   flutter_bloc: ^7.0.0
   freezed_annotation: ^0.14.0
   assets_audio_player: ^3.0.3+3
+  gsheets: ^0.3.1
 
 dev_dependencies:
   freezed: ^0.14.0
