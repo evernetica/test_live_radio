@@ -55,27 +55,56 @@ class _MainWidget extends StatelessWidget {
           Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
-              child: Image.network(imageHolder),
+              child: Expanded(
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Image.network(
+                    imageHolder,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          backgroundColor: Colors.black26,
+                          color: Colors.green,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
             ),
           ),
-          Text(name),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                  onPressed: _onPrevButton,
-                  icon: Icon(Icons.skip_previous_sharp)),
-              StreamBuilder<bool>(
-                stream: _playerCubit.isPlayingStream,
-                builder: (context, snapshot) {
-                  final bool isPlaying = snapshot.data ?? false;
-                  return IconButton(
-                      onPressed: _onPlayButton, icon: Icon(isPlaying ? Icons.stop_circle_outlined : Icons.play_circle_outline));
-                }
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16, bottom: 16),
+              child: Align(
+                alignment:  Alignment.center,
+                child: Text(
+                  name,
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                ),
               ),
-              IconButton(
-                  onPressed: _onNextButton, icon: Icon(Icons.skip_next_sharp))
-            ],
+            ),
+          ),
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _iconButton(Icon(Icons.skip_previous_sharp), _onPrevButton),
+                StreamBuilder<bool>(
+                    stream: _playerCubit.isPlayingStream,
+                    builder: (context, snapshot) {
+                      final bool isPlaying = snapshot.data ?? false;
+                      return _iconButton(
+                          Icon(isPlaying
+                              ? Icons.stop_circle_outlined
+                              : Icons.play_circle_outline),
+                          _onPlayButton);
+                    }),
+                _iconButton(Icon(Icons.skip_next_sharp), _onNextButton)
+              ],
+            ),
           )
         ],
       ),
@@ -92,5 +121,11 @@ class _MainWidget extends StatelessWidget {
 
   void _onPlayButton() {
     _playerCubit.onChangePlayStop();
+  }
+
+  Widget _iconButton(Widget icon, VoidCallback? _pressed) {
+    return Expanded(
+        flex: 1, child: IconButton(onPressed: _pressed, icon: icon, iconSize: 48,)
+    );
   }
 }
