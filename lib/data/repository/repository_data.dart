@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'dart:collection';
+
 import 'package:gsheets/gsheets.dart';
 import 'package:test_live_radio/data/Mapper.dart';
 import 'package:test_live_radio/data/objects/object_music.dart';
@@ -8,8 +9,8 @@ import 'package:test_live_radio/domain/repository/repository_data.dart';
 import '../gsheet_cred.dart';
 
 class DataRepositoryImpl extends DataRepository {
-  List<MusicObject> _musicList = List.empty(growable: true);
-  MusicObject? currentSingleMusic;
+  DoubleLinkedQueue<MusicObject> _musicList = DoubleLinkedQueue<MusicObject>();
+  DoubleLinkedQueueEntry<MusicObject>? _currentSingleMusicEntry;
 
   Worksheet? _sheet;
 
@@ -18,37 +19,39 @@ class DataRepositoryImpl extends DataRepository {
         .worksheetByTitle('radio');
   }
 
-  Future<List<MusicObject>> getAll() async {
+  Future<List<MusicObject>> _getAll() async {
     if (_sheet == null) await _init();
-    if (_sheet == null) throw Exception("Google sheet is null");
+    if (_sheet == null) throw ("Google sheet is null");
     final musics = await _sheet!.values.map.allRows();
-    if (musics!.isEmpty) throw Exception("There is no data in google sheet");
+    if (musics == null) throw ("There is no data in google sheet");
+    if (musics.isEmpty) throw ("There is no data in google sheet");
     return musics.map((json) => MusicObject.fromGsheets(json)).toList();
   }
 
   @override
   Future<MusicEntity> getNextSingleMusic() async {
-    //TODO: !!order is wrong
     _musicList.clear();
-    _musicList.addAll(await getAll());
-    if (currentSingleMusic == null)
-      currentSingleMusic = _musicList.first;
-    else
-      currentSingleMusic = _musicList
-          .firstWhere((element) => element.id != currentSingleMusic!.id);
-    return Future.value(musicObjectToMusicEntity(currentSingleMusic!));
+    _musicList.addAll(await _getAll());
+    if (_currentSingleMusicEntry == null)
+      _currentSingleMusicEntry = _musicList.firstEntry();
+    else {
+      _currentSingleMusicEntry = _currentSingleMusicEntry?.nextEntry();
+      if(_currentSingleMusicEntry?.element == null) _currentSingleMusicEntry = _musicList.firstEntry();
+    }
+    return Future.value(musicObjectToMusicEntity(_currentSingleMusicEntry!.element));
   }
 
   @override
   Future<MusicEntity> getPrevSingleMusic() async {
-    //TODO: !!order is wrong
     _musicList.clear();
-    _musicList.addAll(await getAll());
-    if (currentSingleMusic == null)
-      currentSingleMusic = _musicList.first;
-    else
-      currentSingleMusic = _musicList
-          .firstWhere((element) => element.id != currentSingleMusic!.id);
-    return Future.value(musicObjectToMusicEntity(currentSingleMusic!));
+    _musicList.addAll(await _getAll());
+    if (_currentSingleMusicEntry == null)
+      _currentSingleMusicEntry = _musicList.firstEntry();
+    else {
+      _currentSingleMusicEntry = _currentSingleMusicEntry?.previousEntry();
+      if(_currentSingleMusicEntry?.element == null) _currentSingleMusicEntry = _musicList.firstEntry();
+    }
+
+    return Future.value(musicObjectToMusicEntity(_currentSingleMusicEntry!.element));
   }
 }

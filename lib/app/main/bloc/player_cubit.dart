@@ -26,7 +26,9 @@ class PlayerCubit extends Cubit<PlayerState> {
       _play(value.musicUrl);
       emit(PlayerState.play(
           false, value.imageHolder, value.musicUrl, value.name));
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      emit(PlayerState.error(error.toString()));
+    });
   }
 
   void onNext() async {
@@ -35,7 +37,9 @@ class PlayerCubit extends Cubit<PlayerState> {
       _play(value.musicUrl);
       emit(PlayerState.play(
           true, value.imageHolder, value.musicUrl, value.name));
-    }).onError((error, stackTrace) {});
+    }).onError((error, stackTrace) {
+      emit(PlayerState.error(error.toString()));
+    });
   }
 
   void onPrev() async {
